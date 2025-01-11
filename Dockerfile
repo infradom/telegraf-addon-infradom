@@ -1,4 +1,7 @@
-FROM alpine:3.21 # was 3.20
+#FROM 3.20
+ARG BUILD_FROM
+FROM $BUILD_FROM
+RUN echo $BUILD_FROM
 
 RUN echo 'hosts: files dns' >> /etc/nsswitch.conf
 RUN apk add --no-cache iputils ca-certificates net-snmp-tools procps lm_sensors tzdata su-exec libcap && \
@@ -39,6 +42,11 @@ RUN ARCH= && \
 EXPOSE 8125/udp 8092/udp 8094
 
 COPY entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+COPY run.sh /run.sh
+RUN chmod 755 /entrypoint.sh
+RUB chmod 755 /run.sh
+# ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["run.sh"]
 # CMD ["telegraf"]
-CMD "/bin/bash"
+# keep it running even after failure
+CMD tail -f /dev/null

@@ -1,4 +1,5 @@
 #!/bin/sh
+# not used anymore
 set -e
 
 if [ "${1:0:1}" = '-' ]; then
