@@ -1,6 +1,6 @@
 name: "Telegraf Addon"
 description: "Influxdata telegraf addon - infradom"
-version: "1.33.102"
+version: "1.33.103"
 slug: "telegraf_addon_infradom"
 url: "https://github.com/infradom/telegraf-addon-infradom"
 init: false
@@ -17,7 +17,7 @@ boot: manual
 #auth_api: true
 #docker_api: true
 #host_network: true
-apparmor: false
+#apparmor: false
 maps:
   - config: "rw"
     ssl: "rw"
