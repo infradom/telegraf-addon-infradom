@@ -39,14 +39,42 @@ RUN ARCH= && \
     adduser -S telegraf -G telegraf && \
     chown -R telegraf:telegraf /etc/telegraf
 
-EXPOSE 8125/udp 8092/udp 8094
+#EXPOSE 8125/udp 8092/udp 8094
+EXPOSE 8086
+
+# Build arguments
+ARG BUILD_ARCH
+ARG BUILD_DATE
+ARG BUILD_DESCRIPTION
+ARG BUILD_NAME
+ARG BUILD_REF
+ARG BUILD_REPOSITORY
+ARG BUILD_VERSION
+
+# Labels
+LABEL \
+    io.hass.name="${BUILD_NAME}" \
+    io.hass.description="${BUILD_DESCRIPTION}" \
+    io.hass.arch="${BUILD_ARCH}" \
+    io.hass.type="addon" \
+    io.hass.version=${BUILD_VERSION} \
+    maintainer="infradom" \
+    org.opencontainers.image.title="${BUILD_NAME}" \
+    org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
+    org.opencontainers.image.vendor="Sacrementus's addons" \
+    org.opencontainers.image.authors="infradom" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.created=${BUILD_DATE} \
+    org.opencontainers.image.revision=${BUILD_REF} \
+    org.opencontainers.image.version=${BUILD_VERSION}
+
 
 COPY entrypoint.sh /entrypoint.sh
 COPY run.sh /run.sh
 RUN chmod 755 /entrypoint.sh
-RUB chmod 755 /run.sh
+RUN chmod 755 /run.sh
 # ENTRYPOINT ["/entrypoint.sh"]
-ENTRYPOINT ["run.sh"]
-# CMD ["telegraf"]
-# keep it running even after failure
-CMD tail -f /dev/null
+ENTRYPOINT ["/run.sh"]
+#CMD ["telegraf"]
+# keep it running even after failure - debugging only
+#CMD tail -f /dev/null

@@ -3,7 +3,7 @@ declare influx_un
 declare influx_pw
 declare influx_ret
 declare hostname
-bashio::require.unprotected
+#bashio::require.unprotected
 
 readonly CONFIG="/etc/telegraf/telegraf.conf"
 
@@ -18,6 +18,8 @@ INFLUXDBV2_ORG=$(bashio::config 'influxDBv2.organization')
 INFLUXDBV2_BUCKET=$(bashio::config 'influxDBv2.bucket')
 #RETENTION=$(bashio::config 'influxDB.retention_policy')
 DOCKER_TIMEOUT=$(bashio::config 'docker.timeout')
+TCPPORT=$(bashio::config 'tcpport')
+SKIPPAA=$(bashio::config 'skip_processors_after_aggregators')
 #SMART_TIMEOUT=$(bashio::config 'smart_monitor.timeout')
 #IPMI_USER=$(bashio::config 'ipmi_sensor.server_user_id')
 #IPMI_PASSWORD=$(bashio::config 'ipmi_sensor.server_password')
@@ -41,7 +43,8 @@ else
   else
     hostname=" hostname = ''"
   fi
-
+  mv /etc/telegraf/telegraf.conf /etc/telegraf/telegraf.confsave
+  bashio::log.info "hostname ${HOSTNAME}"
   {
     echo "[agent]"
     echo "  interval = \"60s\""
@@ -51,12 +54,14 @@ else
     echo "  collection_jitter = \"0s\""
     echo "  flush_interval = \"10s\""
     echo "  flush_jitter = \"0s\""
-    echo "  precision = \"\""
+    echo "  precision = \"1s\""
+    echo "  skip_processors_after_aggregators = SKIPPAA"
     echo "  ${hostname}"
     echo "  omit_hostname = false"
   } >> $CONFIG
   sed -i "s,HOSTNAME,${HOSTNAME},g" $CONFIG
-
+  sed -i "s,SKIPPAA,${SKIPPAA},g" $CONFIG
+  bashio::log.info "Agent written"
   #if bashio::config.true 'influxDB.enabled'; then
   #  if bashio::var.has_value "${INFLUX_UN}"; then
   #    influx_un="  username='INFLUX_UN'"
@@ -153,14 +158,16 @@ else
   #  done
   #fi
  
-  if bashio::config.true ; then
+  if bashio::config 'tcpport' ; then
     bashio::log.info "Creating listener config"
     {
-
+      echo "[[inputs.influxdb_v2_listener]]"
+      echo "  service_address = ':TCPPORT'"
     } >> $CONFIG
+    sed -i "s,TCPPORT,${TCPPORT},g" $CONFIG
   fi
 
-  if bashio::config.true ; then
+  if true ; then
     bashio::log.info "Creating CPU agent"
     {
       echo "[[inputs.cpu]]"
@@ -168,13 +175,13 @@ else
       echo "  totalcpu = true"
     } >> $CONFIG
   fi
-  
+
   if bashio::config.true 'influxDBv2.enabled'; then
     bashio::log.info "Updating config for cloud influxdbv2"
     {
       echo "[[outputs.influxdb_v2]]"
-      echo "INFLUX_HOST='INFLUXv2_URL'"
-      #echo "  urls = [\"INFLUXv2_URL\"]"
+      #echo "  INFLUX_HOST='INFLUXv2_URL'"
+      echo "  urls = [\"INFLUXv2_URL\"]"
       echo "  token = 'INFLUX_TOKEN'"
       echo "  organization = 'INFLUX_ORG'"
       echo "  bucket = 'INFLUX_BUCKET'"
@@ -202,3 +209,4 @@ fi
 bashio::log.info "Finished updating config, Starting Telegraf"
 
 telegraf
+

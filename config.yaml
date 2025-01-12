@@ -1,6 +1,6 @@
 name: "Telegraf Addon"
 description: "Influxdata telegraf addon - infradom"
-version: "1.33"
+version: "1.33.102"
 slug: "telegraf_addon_infradom"
 url: "https://github.com/infradom/telegraf-addon-infradom"
 init: false
@@ -11,39 +11,49 @@ arch:
   - armv7
   - i386
 startup: before
+boot: manual
+#hassio_api: true
+#hassio_role: "admin"
+#auth_api: true
+#docker_api: true
+#host_network: true
+apparmor: false
+maps:
+  - config: "rw"
+    ssl: "rw"
+    addons: "rw"
+    backup: "rw"
+    share: "rw"
 ports:
-  8094/tcp: 8094
+  8086/tcp: 8086
 
 privileged: [SYS_ADMIN]
 options:
   loglevel: "info"
-  info_log: "write"
-  tcpport: 8094
+  tcpport: !!int 8086
   custom_conf: 
-    enabled: false
-    location: "/share/telegraf.conf"
+      enabled: false
+      location: "/share/telegraf.conf"
   hostname: "ha-telegraf-addon"
+  skip_processors_after_aggregators: true
   influxDBv2:
-    enabled: true
-    url: "https://eu-central-1-1.aws.cloud.infradata.com"
-    organization: "home"
-    token: ""
-    bucket: "home_assistant" 
-
-
-  #pubkey: "ssh-rsa ReplaceByYourPublicKey modbusspy"
+      enabled: true
+      url: "https://eu-central-1-1.aws.cloud2.influxdata.com"
+      organization: "home"
+      token: ""
+      bucket: "home_assistant"
 schema:
   loglevel: "list(error|warning|info|debug)"
-  info_log: "list(read|write|both|none)"
-  tcpport : "int"
+  tcpport: "int"
   custom_conf:
-    enabled: "bool"
-    location: "str"
+      enabled: "bool"
+      location: "str"
   hostname: "str"
+  skip_processors_after_aggregators: "bool"
   influxDBv2:
-    enabled: bool
-    url: "str"
-    organization: "str"
-    token: "str"
-    bucket: str
+      enabled: bool
+      url: "str"
+      organization: "str"
+      token: "str"
+      bucket: str
 
