@@ -71,6 +71,7 @@ LABEL \
 
 COPY entrypoint.sh /entrypoint.sh
 COPY run.sh /run.sh
+COPY *.conf /etc/telegraf/telegraf.d/ 
 RUN chmod 755 /entrypoint.sh
 RUN chmod 755 /run.sh
 # ENTRYPOINT ["/entrypoint.sh"]

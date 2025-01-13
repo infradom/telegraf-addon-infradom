@@ -31,7 +31,8 @@ CUSTOM_CONF_ENABLED=$(bashio::config 'custom_conf.enabled')
 CUSTOM_CONF=$(bashio::config 'custom_conf.location')
 
 
-if bashio::var.true "${CUSTOM_CONF_ENABLED}"; then
+if false; then #bashio::var.true "${CUSTOM_CONF_ENABLED}"; then
+  # this part disabled, custom conf is appended at the end instead
   bashio::log.info "Using custom conf file"
   rm /etc/telegraf/telegraf.conf
   cp "${CUSTOM_CONF}" /etc/telegraf/telegraf.conf
@@ -167,14 +168,14 @@ else
     sed -i "s,TCPPORT,${TCPPORT},g" $CONFIG
   fi
 
-  if true ; then
-    bashio::log.info "Creating CPU agent"
-    {
-      echo "[[inputs.cpu]]"
-      echo "  percpu = false"
-      echo "  totalcpu = true"
-    } >> $CONFIG
-  fi
+  #if true ; then
+  #  bashio::log.info "Creating CPU agent"
+  #  {
+  #    echo "[[inputs.cpu]]"
+  #    echo "  percpu = false"
+  #    echo "  totalcpu = true"
+  #  } >> $CONFIG
+  #fi
 
   if bashio::config.true 'influxDBv2.enabled'; then
     bashio::log.info "Updating config for cloud influxdbv2"
@@ -203,10 +204,22 @@ else
   #  PROM_METRICS_PATH="$( bashio::config 'prometheus.metrics_path' )"
   #  sed -i "s,PROM_METRICS_PATH,${PROM_METRICS_PATH},g" $CONFIG
   #fi
+fi
 
+logvar=$(bashio::config 'loglevel')
+if bashio::var.equals "${logvar}" "debug"; then
+  { echo "[[outputs.file]]"
+    echo "  data_format = 'influx'"
+    echo "  files = ['stdout']"
+  } >> $CONFIG
+fi
+
+if bashio::var.true "${CUSTOM_CONF_ENABLED}"; then
+  bashio::log.info "Appending custom conf file ${CUSTOM_CONF}"
+  cat "${CUSTOM_CONF}" >> /etc/telegraf/telegraf.conf
 fi
 
 bashio::log.info "Finished updating config, Starting Telegraf"
 
-telegraf
+telegraf --config /etc/telegraf/telegraf.conf --config-directory /etc/telegraf/telegraf.d
 

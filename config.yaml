@@ -33,9 +33,9 @@ options:
   tcpport: !!int 8086
   custom_conf: 
       enabled: false
-      location: "/share/telegraf.conf"
+      location: "/telegraf-custom.conf"
   hostname: "ha-telegraf-addon"
-  skip_processors_after_aggregators: true
+  skip_processors_after_aggregators: false
   influxDBv2:
       enabled: true
       url: "https://eu-central-1-1.aws.cloud2.influxdata.com"
