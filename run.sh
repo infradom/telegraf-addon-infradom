@@ -19,6 +19,7 @@ INFLUXDBV2_BUCKET=$(bashio::config 'influxDBv2.bucket')
 #RETENTION=$(bashio::config 'influxDB.retention_policy')
 DOCKER_TIMEOUT=$(bashio::config 'docker.timeout')
 TCPPORT=$(bashio::config 'tcpport')
+EXCLUDE_IDS=$(bashio::config 'exclude_metrics_matching_entity_id')
 SKIPPAA=$(bashio::config 'skip_processors_after_aggregators')
 #SMART_TIMEOUT=$(bashio::config 'smart_monitor.timeout')
 #IPMI_USER=$(bashio::config 'ipmi_sensor.server_user_id')
@@ -164,6 +165,8 @@ else
     {
       echo "[[inputs.influxdb_v2_listener]]"
       echo "  service_address = ':TCPPORT'"
+      echo "  [inputs.influxdb_v2_listener.tagdrop]"
+      echo "    entity_id = "${EXCLUDE_IDS}
     } >> $CONFIG
     sed -i "s,TCPPORT,${TCPPORT},g" $CONFIG
   fi
@@ -222,4 +225,4 @@ fi
 bashio::log.info "Finished updating config, Starting Telegraf"
 
 telegraf --config /etc/telegraf/telegraf.conf --config-directory /etc/telegraf/telegraf.d
-
+#tail -f /dev/null # please comment this line !
